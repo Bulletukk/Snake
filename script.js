@@ -1,88 +1,110 @@
 class SnakeGame {
-    constructor() {
-        this.xDir = 1;
-        this.yDir = 0;
-        this.maxX = 30;
-        this.maxY = 14;
-        this.snakePositions = [[5,6],[4,6],[3,6]];
-        this.dot = null;
-        this.skipFrequency = 6; //How many frame updates between each snake move.
-        this.setNewDot();
-    }
+    #xDir;
+    #yDir;
+    #maxX;
+    #maxY;
+    #snakePositions;
+    #dot;
+    #skipFrequency;
 
+    constructor() {
+        this.#xDir = 1;
+        this.#yDir = 0;
+        this.#maxX = 30;
+        this.#maxY = 14;
+        this.#snakePositions = [[5,6],[4,6],[3,6]];
+        this.#dot = null;
+        this.#skipFrequency = 6; //How many frame updates between each snake move.
+        this.#setNewDot();
+    }
+    getSnakeLength(){
+        return this.#snakePositions.length;
+    }
+    getSkipFrequency(){
+        return this.#skipFrequency;
+    }
     setDir(key) {
-        if (key=="ArrowUp" && this.yDir!=1){
-            this.xDir = 0;
-            this.yDir = -1;
+        if ((key=="ArrowUp" || key=="KeyW") && this.#yDir!=1){
+            this.#xDir = 0;
+            this.#yDir = -1;
             return true;
-        } else if (key=="ArrowLeft" && this.xDir!=1){
-            this.xDir = -1;
-            this.yDir = 0;
+        } else if ((key=="ArrowLeft" || key=="KeyA") && this.#xDir!=1){
+            this.#xDir = -1;
+            this.#yDir = 0;
             return true;
-        } else if (key=="ArrowDown" && this.yDir!=-1){
-            this.xDir = 0;
-            this.yDir = 1;
+        } else if ((key=="ArrowDown" || key=="KeyS") && this.#yDir!=-1){
+            this.#xDir = 0;
+            this.#yDir = 1;
             return true;
-        } else if (key=="ArrowRight" && this.xDir!=-1){
-            this.xDir = 1;
-            this.yDir = 0;
+        } else if ((key=="ArrowRight" || key=="KeyD") && this.#xDir!=-1){
+            this.#xDir = 1;
+            this.#yDir = 0;
             return true;
         }
         return false;
     }
-    setNewDot() {
+    #setNewDot() {
         var foundLegalPlace = false;
         while (foundLegalPlace==false) {
-            this.dot = [Math.floor(Math.random()*(this.maxX+1)),Math.floor(Math.random()*(this.maxY+1))];
+            this.#dot = [Math.floor(Math.random()*(this.#maxX+1)),Math.floor(Math.random()*(this.#maxY+1))];
             foundLegalPlace = true;
             //Check if snake occupies the dot position:
-            for (var i=0;i<this.snakePositions.length;i++) {
-                if (this.dot[0]==this.snakePositions[i][0] && this.dot[1]==this.snakePositions[i][1]) {
+            for (var i=0;i<this.#snakePositions.length;i++) {
+                if (this.#dot[0]==this.#snakePositions[i][0] && this.#dot[1]==this.#snakePositions[i][1]) {
                     foundLegalPlace = false;
                 }
             }
             //Check if dot is right in front of snake:
-            if (this.snakePositions[0][0]+this.xDir==this.dot[0] && this.snakePositions[0][1]+this.yDir==this.dot[1]){
+            if (this.#snakePositions[0][0]+this.#xDir==this.#dot[0] && this.#snakePositions[0][1]+this.#yDir==this.#dot[1]){
                 foundLegalPlace = false;
             }
         }
     }
     move() {
+        if (!this.#isLegalMove(this.#snakePositions[0][0]+this.#xDir, this.#snakePositions[0][1]+this.#yDir)) {
+            return false;
+        }
         //Moves snake, returns whether we're still in game or not (game over)
-        if (this.dot[0]==this.snakePositions[0][0] && this.dot[1]==this.snakePositions[0][1]){
+        if (this.#dot[0]==this.#snakePositions[0][0]+this.#xDir && this.#dot[1]==this.#snakePositions[0][1]+this.#yDir){
             //Eating dot, lenthening snake, moving snake
-            this.snakePositions.push(this.snakePositions[this.snakePositions.length-1])
-            for (var i=this.snakePositions.length-2;i>0;i--){
-                this.snakePositions[i] = [this.snakePositions[i-1][0],this.snakePositions[i-1][1]];
+            this.#snakePositions.push(this.#snakePositions[this.#snakePositions.length-1])
+            for (var i=this.#snakePositions.length-2;i>0;i--){
+                this.#snakePositions[i] = [this.#snakePositions[i-1][0],this.#snakePositions[i-1][1]];
             }
-            this.snakePositions[0][0] += this.xDir;
-            this.snakePositions[0][1] += this.yDir;
-            if (this.skipFrequency>1){
-                this.skipFrequency -= 0.25; //Increase the speed of the snake (reduce the frequency) if max speed hasn't been reached.
-                console.log(this.skipFrequency);
+            this.#snakePositions[0][0] = this.#dot[0];
+            this.#snakePositions[0][1] = this.#dot[1];
+            if (this.#skipFrequency>1){
+                this.#skipFrequency -= 0.25; //Increase the speed of the snake (reduce the frequency) if max speed hasn't been reached.
             }
-            this.setNewDot();
+            this.#setNewDot();
         } else {
             //Just moving snake
-            for (var i=this.snakePositions.length-1;i>0;i--){
-                this.snakePositions[i] = [this.snakePositions[i-1][0],this.snakePositions[i-1][1]];
+            for (var i=this.#snakePositions.length-1;i>0;i--){
+                this.#snakePositions[i] = [this.#snakePositions[i-1][0],this.#snakePositions[i-1][1]];
             }
-            this.snakePositions[0][0] += this.xDir;
-            this.snakePositions[0][1] += this.yDir;
-            if (!this.legalMove()) {
-                this.lose();
+            this.#snakePositions[0][0] += this.#xDir;
+            this.#snakePositions[0][1] += this.#yDir;
+        }
+        return true;
+    }
+    #isLegalMove(xPos,yPos) {
+        //Check if snake will hit edge of board or itself, in which case "false" is returned. Otherwise, "true" is returned.
+        if (xPos<0 || xPos>this.#maxX || yPos<0 || yPos>this.#maxY) {
+            return false;
+        }
+        for (var i=0;i<s.#snakePositions.length-1;i++){
+            if (xPos==this.#snakePositions[i][0] && yPos==this.#snakePositions[i][1]){
+                return false;
             }
         }
         return true;
     }
-    legalMove() {
-        //Check if snake has hit edge of board or itself
-        return true;
-    }
-    lose() {
-        //Temporary code
-        this.snakePositions = [[5,6],[4,6],[3,6]];
-        this.skipFrequency = 4;
+    getPointsToDraw(){
+        var drawPoints = [[...this.#dot]];
+        for (var i=0;i<this.#snakePositions.length;i++){
+            drawPoints.push([...this.#snakePositions[i]]);
+        }
+        return drawPoints;
     }
 };
 
@@ -92,6 +114,8 @@ var recWidth = 620;
 var recHeight = 300;
 var takeInput = false;
 var updateCount = 0;
+var inGame = true;
+var drawPoints = null;
 
 const canvas = document.getElementById("snakeGame");
 const ctx = canvas.getContext("2d");
@@ -110,12 +134,16 @@ snakeInterval = setInterval(() => {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, recWidth, recHeight);
     ctx.fillStyle = "black";
-    for(var i=0;i<s.snakePositions.length;i++){
-        ctx.fillRect(20*s.snakePositions[i][0], 20*s.snakePositions[i][1], 20, 20);
+    drawPoints = s.getPointsToDraw();
+    for(var i=0;i<drawPoints.length;i++){
+        ctx.fillRect(20*drawPoints[i][0], 20*drawPoints[i][1], 20, 20);
     }
-    ctx.fillRect(20*s.dot[0],20*s.dot[1],20,20);
-    if (updateCount>s.skipFrequency){
-        s.move();
+    if (updateCount>s.getSkipFrequency()){
+        inGame = s.move(); //see whether game is still going on.
+        if (!inGame) {
+            delete s;
+            s = new SnakeGame();
+        }
         updateCount = 0;
         takeInput = true;
     } else {
@@ -123,6 +151,3 @@ snakeInterval = setInterval(() => {
     }
 }, minSnakeMoveInterval);
 //To stop this function, call clearInterval(snakeInterval);
-//TODO:
-//- Create getter functions. Make sure private variables can't be changed externally.
-//- Incorporate draw function in snake.
