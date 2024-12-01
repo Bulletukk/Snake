@@ -1,11 +1,13 @@
-class Snake {
+class SnakeGame {
     constructor() {
-        this.snakeLength = 3;
         this.xDir = 1;
         this.yDir = 0;
-        this.positions = [[5,6],[4,6],[3,6]];
-        this.shouldLengthen = false;
-        this.skipFrequency = 4; //How many frame updates between each snake move.
+        this.maxX = 30;
+        this.maxY = 14;
+        this.snakePositions = [[5,6],[4,6],[3,6]];
+        this.dot = null;
+        this.skipFrequency = 6; //How many frame updates between each snake move.
+        this.setNewDot();
     }
 
     setDir(key) {
@@ -28,30 +30,64 @@ class Snake {
         }
         return false;
     }
-    move() {
-        if (this.shouldLengthen==true){
-            this.positions.push(this.positions[this.positions.length-1])
-            for (var i=this.positions.length-2;i--;i>0){
-                this.positions[i] = this.positions[i-1];
+    setNewDot() {
+        var foundLegalPlace = false;
+        while (foundLegalPlace==false) {
+            this.dot = [Math.floor(Math.random()*(this.maxX+1)),Math.floor(Math.random()*(this.maxY+1))];
+            foundLegalPlace = true;
+            //Check if snake occupies the dot position:
+            for (var i=0;i<this.snakePositions.length;i++) {
+                if (this.dot[0]==this.snakePositions[i][0] && this.dot[1]==this.snakePositions[i][1]) {
+                    foundLegalPlace = false;
+                }
             }
-            this.positions[0][0] += this.xDir;
-            this.positions[0][1] += this.yDir;
-            this.shouldLengthen=false;
-            if (this.skipFrequency>1){
-                this.skipFrequency -= 0.25;
+            //Check if dot is right in front of snake:
+            if (this.snakePositions[0][0]+this.xDir==this.dot[0] && this.snakePositions[0][1]+this.yDir==this.dot[1]){
+                foundLegalPlace = false;
             }
-        } else {
-            for (var i=this.positions.length-1;i>0;i--){
-                this.positions[i] = [this.positions[i-1][0],this.positions[i-1][1]];
-            }
-            this.positions[0][0] += this.xDir;
-            this.positions[0][1] += this.yDir;
         }
     }
+    move() {
+        //Moves snake, returns whether we're still in game or not (game over)
+        if (this.dot[0]==this.snakePositions[0][0] && this.dot[1]==this.snakePositions[0][1]){
+            //Eating dot, lenthening snake, moving snake
+            this.snakePositions.push(this.snakePositions[this.snakePositions.length-1])
+            for (var i=this.snakePositions.length-2;i>0;i--){
+                this.snakePositions[i] = [this.snakePositions[i-1][0],this.snakePositions[i-1][1]];
+            }
+            this.snakePositions[0][0] += this.xDir;
+            this.snakePositions[0][1] += this.yDir;
+            if (this.skipFrequency>1){
+                this.skipFrequency -= 0.25; //Increase the speed of the snake (reduce the frequency) if max speed hasn't been reached.
+                console.log(this.skipFrequency);
+            }
+            this.setNewDot();
+        } else {
+            //Just moving snake
+            for (var i=this.snakePositions.length-1;i>0;i--){
+                this.snakePositions[i] = [this.snakePositions[i-1][0],this.snakePositions[i-1][1]];
+            }
+            this.snakePositions[0][0] += this.xDir;
+            this.snakePositions[0][1] += this.yDir;
+            if (!this.legalMove()) {
+                this.lose();
+            }
+        }
+        return true;
+    }
+    legalMove() {
+        //Check if snake has hit edge of board or itself
+        return true;
+    }
+    lose() {
+        //Temporary code
+        this.snakePositions = [[5,6],[4,6],[3,6]];
+        this.skipFrequency = 4;
+    }
 };
-//Method: multiply snakemoveinterval by 4/5 every time.
-var s = new Snake();
-var minSnakeMoveInterval = 50;
+
+var s = new SnakeGame();
+var minSnakeMoveInterval = 25;
 var recWidth = 620;
 var recHeight = 300;
 var takeInput = false;
@@ -74,10 +110,10 @@ snakeInterval = setInterval(() => {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, recWidth, recHeight);
     ctx.fillStyle = "black";
-    for(var i=0;i<s.positions.length;i++){
-        console.log(20*s.positions[i][0],20*s.positions[i][1]);
-        ctx.fillRect(20*s.positions[i][0], 20*s.positions[i][1], 20, 20);
+    for(var i=0;i<s.snakePositions.length;i++){
+        ctx.fillRect(20*s.snakePositions[i][0], 20*s.snakePositions[i][1], 20, 20);
     }
+    ctx.fillRect(20*s.dot[0],20*s.dot[1],20,20);
     if (updateCount>s.skipFrequency){
         s.move();
         updateCount = 0;
@@ -87,3 +123,6 @@ snakeInterval = setInterval(() => {
     }
 }, minSnakeMoveInterval);
 //To stop this function, call clearInterval(snakeInterval);
+//TODO:
+//- Create getter functions. Make sure private variables can't be changed externally.
+//- Incorporate draw function in snake.
