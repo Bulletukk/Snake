@@ -116,6 +116,11 @@ var takeInput = false;
 var updateCount = 0;
 var inGame = true;
 var drawPoints = null;
+var highScore = localStorage.getItem('highscore');
+if (highScore==null){
+    highScore = 0;
+}
+document.getElementById("hs").innerHTML = "Highscore: " + highScore;
 
 const canvas = document.getElementById("snakeGame");
 const ctx = canvas.getContext("2d");
@@ -140,6 +145,11 @@ snakeInterval = setInterval(() => {
     }
     if (updateCount>s.getSkipFrequency()){
         inGame = s.move(); //see whether game is still going on.
+        if (s.getSnakeLength()>highScore) {
+            highScore = s.getSnakeLength();
+            localStorage.setItem('highscore', highScore);
+            document.getElementById("hs").innerHTML = "Highscore: " + highScore;
+        }
         if (!inGame) {
             delete s;
             s = new SnakeGame();
