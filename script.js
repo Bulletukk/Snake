@@ -129,12 +129,33 @@ ctx.fillRect(0, 0, recWidth, recHeight);
 
 window.addEventListener("keydown", (e) => {
     if (takeInput==true){
-        s.setDir(e.code);
+        if(inGame==true)
+            s.setDir(e.code);
         takeInput=false;
     }
 });
 
-snakeInterval = setInterval(() => {
+window.addEventListener("click", (e) => {
+    if (inGame==false){
+        s = new SnakeGame();
+        snakeInterval = setInterval(() => {
+            playGame();
+        }, minSnakeMoveInterval);
+        inGame = true;
+    }
+});
+
+function drawGameOver(){
+    ctx.fillStyle = "black";
+    ctx.fillRect(recWidth/4-3,2*recHeight/5-3,recWidth/2+6,recHeight/5+6);
+    ctx.fillStyle = "white";
+    ctx.fillRect(recWidth/4,2*recHeight/5,recWidth/2,recHeight/5);
+    ctx.fillStyle = "black";
+    ctx.font = "30px Arial";
+    ctx.fillText("Play again",50*recWidth/128,11*recHeight/20);
+}
+
+function playGame(){
     ctx.clearRect(0,0,recWidth,recHeight);
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, recWidth, recHeight);
@@ -151,13 +172,16 @@ snakeInterval = setInterval(() => {
             document.getElementById("hs").innerHTML = "Highscore: " + highScore;
         }
         if (!inGame) {
-            delete s;
-            s = new SnakeGame();
+            drawGameOver();
+            clearInterval(snakeInterval);
         }
         updateCount = 0;
         takeInput = true;
     } else {
         updateCount++;
-    }
+    }    
+}
+
+snakeInterval = setInterval(() => {
+    playGame();
 }, minSnakeMoveInterval);
-//To stop this function, call clearInterval(snakeInterval);
